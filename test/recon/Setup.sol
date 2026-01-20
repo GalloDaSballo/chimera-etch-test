@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 // Chimera deps
 import {BaseSetup} from "@chimera/BaseSetup.sol";
-import {vm} from "@chimera/Hevm.sol";
+import {vm, IHevm} from "@chimera/Hevm.sol";
 
 // Managers
 import {ActorManager} from "@recon/ActorManager.sol";
@@ -14,6 +14,14 @@ import {Utils} from "@recon/Utils.sol";
 
 // Your deps
 import "src/Counter.sol";
+
+// Extend IHevm with etch function (not present in base chimera Hevm.sol)
+interface IHevmEtch is IHevm {
+    function etch(address target, bytes calldata newRuntimeBytecode) external;
+}
+
+// Cast vm to extended interface with etch support
+IHevmEtch constant vmEtch = IHevmEtch(address(vm));
 
 abstract contract Setup is BaseSetup, ActorManager, AssetManager, Utils {
     Counter counter;
@@ -31,6 +39,20 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager, Utils {
         address[] memory approvalArray = new address[](1);
         approvalArray[0] = address(counter);
         _finalizeAssetDeployment(_getActors(), approvalArray, type(uint88).max);
+
+        // Test vm.etch functionality
+        address targetAddr = address(0xBEEF);
+
+        // Assert initial code length is zero
+        require(targetAddr.code.length == 0, "Initial code should be zero");
+
+        // Etch some bytecode (simple STOP opcode: 0x00)
+        bytes memory bytecode = hex"00";
+        vmEtch.etch(targetAddr, bytecode);
+
+        // Assert code was etched successfully
+        require(targetAddr.code.length == bytecode.length, "Etched code length mismatch");
+        require(keccak256(targetAddr.code) == keccak256(bytecode), "Etched code content mismatch");
     }
 
     /// === MODIFIERS === ///

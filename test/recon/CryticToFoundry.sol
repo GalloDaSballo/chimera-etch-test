@@ -25,4 +25,14 @@ contract CryticToFoundry is Test, TargetFunctions, FoundryAsserts {
     function test_crytic() public {
         // TODO: add failing property tests here for debugging
     }
+
+    // forge test --match-test test_etch_verification -vvvv
+    function test_etch_verification() public view {
+        address targetAddr = address(0xBEEF);
+        bytes memory expectedBytecode = hex"00";
+
+        // Verify the etched code persists after setup
+        assertEq(targetAddr.code.length, expectedBytecode.length, "Etched code length mismatch");
+        assertEq(keccak256(targetAddr.code), keccak256(expectedBytecode), "Etched code content mismatch");
+    }
 }

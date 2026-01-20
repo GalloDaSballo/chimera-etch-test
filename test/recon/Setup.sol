@@ -51,6 +51,7 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager, Utils {
         vmEtch.etch(targetAddr, bytecode);
 
         // Assert code was etched successfully
+        require(targetAddr.code.length > 0, "Etched code length should be greater than zero");
         require(targetAddr.code.length == bytecode.length, "Etched code length mismatch");
         require(keccak256(targetAddr.code) == keccak256(bytecode), "Etched code content mismatch");
     }

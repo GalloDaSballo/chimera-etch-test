@@ -47,7 +47,7 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager, Utils {
         require(targetAddr.code.length == 0, "Initial code should be zero");
 
         // Etch some bytecode (simple STOP opcode: 0x00)
-        bytes memory bytecode = hex"00";
+        bytes memory bytecode = hex"AA";
         vmEtch.etch(targetAddr, bytecode);
 
         // Assert code was etched successfully
